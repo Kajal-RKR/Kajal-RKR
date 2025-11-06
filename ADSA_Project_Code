@@ -1,0 +1,102 @@
+#include <iostream> 
+#include <vector> 
+#include <string> 
+#include <functional>  
+#include <algorithm>   
+using namespace std; 
+ 
+struct Product { 
+    int id; 
+    string name; 
+    double price; 
+    double rating; 
+    int popularity; 
+    void display() const { 
+        cout << "ID: " << id 
+             << " | Price: $" << price 
+             << " | Rating: " << rating 
+             << " | Pop: " << popularity 
+             << " | Name: " << name << endl; 
+    } 
+}; 
+ 
+using CompareFunc = std::function<bool(const Product&, const Product&)>; 
+ 
+bool compareByPrice(const Product& a, const Product& b) { 
+    return a.price < b.price; 
+} 
+ 
+bool compareByRating(const Product& a, const Product& b) { 
+    return a.rating > b.rating; 
+} 
+ 
+bool compareByPopularity(const Product& a, const Product& b) { 
+    return a.popularity > b.popularity; 
+} 
+ 
+void insertionSort(vector<Product>& arr, CompareFunc comp) { 
+    int n = arr.size(); 
+    for (int i = 1; i < n; ++i) { 
+        Product key = arr[i]; 
+        int j = i - 1; 
+         
+        while (j >= 0 && !comp(arr[j], key)) { 
+            arr[j + 1] = arr[j]; 
+            j = j - 1; 
+        } 
+        arr[j + 1] = key; 
+    } 
+} 
+ 
+int partition(vector<Product>& arr, int low, int high, CompareFunc comp) { 
+    Product pivot = arr[high]; 
+    int i = (low - 1); 
+ 
+    for (int j = low; j <= high - 1; j++) { 
+        if (comp(arr[j], pivot)) { 
+            i++; 
+            swap(arr[i], arr[j]); 
+        } 
+    } 
+    swap(arr[i + 1], arr[high]); 
+    return (i + 1); 
+} 
+ 
+void quickSort(vector<Product>& arr, int low, int high, CompareFunc comp) { 
+    if (low < high) { 
+        int pi = partition(arr, low, high, comp); 
+ 
+        quickSort(arr, low, pi - 1, comp); 
+        quickSort(arr, pi + 1, high, comp); 
+    } 
+} 
+ 
+void printProducts(const vector<Product>& products, const string& header) { 
+    cout << "\n--- " << header << " ---" << endl; 
+    for (const auto& p : products) { 
+        p.display(); 
+    } 
+    cout << "--------------------------------------------------------" << endl; 
+} 
+ 
+int main() { 
+    vector<Product> products = { 
+        {101, "Laptop Stand", 25.00, 4.2, 550}, 
+        {102, "Wireless Mouse", 15.50, 4.8, 920}, 
+        {103, "Mechanical KBD", 120.99, 4.5, 310}, 
+        {104, "USB-C Hub", 35.75, 3.9, 780}, 
+        {105, "Monitor Cable", 8.99, 4.8, 1100}, 
+        {106, "Webcam", 45.00, 4.1, 400} 
+}; 
+printProducts(products, "Unsorted Data"); 
+vector<Product> productsByPrice = products; 
+insertionSort(productsByPrice, compareByPrice); 
+printProducts(productsByPrice, "Sorted by Price (Insertion Sort: $8.99 -> $120.99)"); 
+vector<Product> productsByRating = products; 
+quickSort(productsByRating, 0, productsByRating.size() - 1, compareByRating); 
+printProducts(productsByRating, "Sorted by Rating (Quick Sort: High Rating First)"); 
+vector<Product> productsByPopularity = products; 
+insertionSort(productsByPopularity, compareByPopularity); 
+printProducts(productsByPopularity, "Sorted by Popularity (Insertion Sort: High Pop First)"); 
+return 0; 
+}
